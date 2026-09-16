@@ -13,7 +13,7 @@
     $sts2-mod-development
     我想制作一个 STS2 Mod，请先根据我的需求检查环境并引导开发。
 
-从 [SKILL.md](SKILL.md) 开始。Agent 会先准备可运行的最小 Mod，再按需求补齐开发工具；玩家无需安装 IDE。
+从 [SKILL.md](SKILL.md) 开始。Agent 首先把 [STS2 Mod 制作教程](https://tutorials.sts2modding.com/) 下载到本机，阅读后决定环境配置，先跑通最小 Mod，再按需求补齐开发工具；玩家无需安装 IDE。
 
 ## 内容
 
@@ -26,7 +26,7 @@
 
 ## 涉及的外部工具
 
-**不用一次安装全部工具。** 新项目先准备 Godot .NET 和 .NET SDK，确认最小 Mod 能编译、导出资源并在游戏中加载，再按任务补齐其他工具。版本由 Agent 根据当前游戏和项目核对，已有兼容安装直接复用。
+**先下载教程，再决定环境，不用一次安装全部工具。** [STS2 Mod 制作教程](https://tutorials.sts2modding.com/) 是第一参考，可通过站点链接的 [源码仓库](https://github.com/GlitchedReme/SlayTheSpire2ModdingTutorials)下载 ZIP 保存到本机，无需先安装 Git。按教程的环境配置章节结合当前游戏确定工具与版本；常见首批为 Godot .NET 和 .NET SDK。确认最小 Mod 能加载后再补后续工具。
 
 ### 首批开发环境
 
@@ -52,7 +52,7 @@
 
 ### 参考资料与随包工具
 
-- [SlayTheSpire2ModdingTutorials](https://github.com/GlitchedReme/SlayTheSpire2ModdingTutorials)：环境、内容、资源与调试教程。
+- **第一参考：[STS2 Mod 制作教程](https://tutorials.sts2modding.com/)**。先下载其 [源码副本](https://github.com/GlitchedReme/SlayTheSpire2ModdingTutorials)到本机，再根据教程决定环境、内容实现、资源处理与调试方式。
 - 官方实现参考从玩家本机对应版本的游戏提取，本仓库不分发游戏源码。
 - 本技能自带的 init、doctor、add-content、diff、record、accept、placeholder、sync-art、icons 命令位于 scripts/moddev.py，详细用法见 [工具接口](references/tools.md)。
 - 完整准备流程见 [环境准备](references/environment.md)，发布与采集见 [发布与扩展](references/extensions.md)。
