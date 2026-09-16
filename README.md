@@ -43,17 +43,12 @@
 | 工具 / 依赖 | 用途 | 何时需要 |
 | --- | --- | --- |
 | [Python](https://www.python.org/downloads/)（本工具要求 3.10+） | 运行本技能的初始化、检查、差异和素材脚本 | 开始使用配套脚本时 |
-| [openpyxl](https://openpyxl.readthedocs.io/) | 生成和读取卡牌、关键词、状态、遗物设计工作簿 | 使用表格工具时 |
-| [Pillow](https://pillow.readthedocs.io/) | 处理 PNG、生成临时卡图和关联状态图标 | 使用图片工具时 |
 | [RitsuLib](https://github.com/BAKAOLC/STS2-RitsuLib) | 角色与内容开发使用的共享框架，提供相关接口和注册能力 | 项目选择该框架时；不是所有 Mod 的必需依赖 |
 | [STS2-Agent / MCP](https://github.com/CharTyr/STS2-Agent) | 将游戏状态与操作连接到 Agent，用于自动读取状态和行为验证 | 接入自动调试时；按所选版本说明配置连接和运行依赖 |
 | [ILSpy / ilspycmd](https://github.com/icsharpcode/ILSpy) | 查看本机对应版本的游戏程序集，查证官方实现 | 需要源码参考时 |
-| [Git](https://git-scm.com/) | 管理项目版本、维护教程副本、同步源码仓库 | 需要版本管理时；初次阅读教程可直接在线进行 |
-| 支持 .xlsx 的表格编辑器 | 供玩家填写设计工作簿 | 使用四类设计表时，沿用玩家已有软件即可 |
 | [官方 Mod 上传器](https://github.com/megacrit/sts2-mod-uploader) | 准备并上传 Steam 创意工坊内容 | 发布到工坊时；同时需要可用的 Steam 登录 |
-| 数据采集后端 | 接收经玩家授权的对局或事件数据 | 用户要求采集时选择，不绑定特定服务 |
 
-Python 的 venv 和 pip 用于建立项目环境及安装依赖。表格与图片库的具体范围见 [requirements.txt](scripts/requirements.txt)；其他工具额外要求的运行时按其当前说明准备，不作为所有项目的统一前置条件。
+配套脚本依赖见 [requirements.txt](scripts/requirements.txt)，其他工具的运行要求按所选版本说明准备。
 
 ### 参考资料与随包工具
 
