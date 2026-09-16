@@ -6,23 +6,13 @@
 
 [STS2 Mod 制作教程](https://tutorials.sts2modding.com/) 是环境配置与后续实现的第一参考。先阅读其目录，并将站点链接的 [源码仓库](https://github.com/GlitchedReme/SlayTheSpire2ModdingTutorials) 下载到本机，保存 Markdown、示例和关联资源，例如放在项目的 references/tutorials。
 
-没有 Git 时，使用系统已有下载与解压能力（如 PowerShell，或 curl 与 unzip）获取 [源码 ZIP](https://github.com/GlitchedReme/SlayTheSpire2ModdingTutorials/archive/refs/heads/master.zip)；已有 Git 也可浅克隆。此步骤不依赖 Python 或项目初始化脚本。已有有效副本可检查来源与更新情况后复用，记录本地位置和版本或获取日期。
+没有 Git 时，使用系统已有下载与解压能力获取 [源码 ZIP](https://github.com/GlitchedReme/SlayTheSpire2ModdingTutorials/archive/refs/heads/master.zip)；已有 Git 也可浅克隆。此步骤不依赖 Python 或项目初始化脚本。已有有效副本可检查来源与更新情况后复用，记录本地位置和版本或获取日期。
 
 优先阅读本地“环境配置”与所选需求的章节，再决定安装什么及其版本；站点的 [环境配置页](https://tutorials.sts2modding.com/docs/01-env-setup/) 用于对照。站点与副本内容不一致时先核对更新情况。下载或访问受阻时说明具体问题并处理，不把其他教程悄悄当成首选来源。
 
 ## 2. 原生初检
 
-先识别操作系统与 CPU 架构，再检查游戏位置、版本和现有工具。使用系统已有能力，无需先有 Python 或项目配置：
-
-| 系统 | 初检与路径候选 |
-| --- | --- |
-| Windows | PowerShell 的系统信息、Get-Command 和 Steam 注册表；工具常为 .exe |
-| macOS | uname -s -m、sw_vers、command -v；Steam 常见于 ~/Library/Application Support/Steam |
-| Linux | uname -s -m、/etc/os-release、command -v；Steam 常见于 ~/.local/share/Steam 或 ~/.steam/steam，Flatpak 安装另查其应用数据目录 |
-
-从实际 Steam 目录的 steamapps/libraryfolders.vdf 查找游戏库；候选路径只是起点，有歧义再请玩家选择。确认游戏、框架和调试工具对该系统、架构及当前运行方式的支持。使用 WSL、兼容层或远程开发时，区分 Agent 所在系统与游戏进程所在系统，按实际进程选择安装位置和启动方法。
-
-Godot 可配置原生可执行文件；Windows 使用 .exe，Linux 使用有执行权限的文件，macOS 可配置 .app 应用包或其中的 Contents/MacOS/Godot。具体包内程序以应用清单为准，工具支持读取该清单。核对 SDK 架构和可执行版本，命令名或路径存在本身不是兼容证明。
+先识别实际操作系统、架构、游戏位置、版本和已有工具。使用当前环境已有能力完成初检，无需先准备 Python 或项目配置。具体命令、路径、安装包和启动方式由 Agent 根据首选教程及现场情况判断，不照搬其他系统的做法。
 
 Agent 负责检查、选版本、安装、配置和验证。玩家只在需要时选择存放位置、登录账户、处理系统权限提示或客户端必须人工执行的操作。给出具体操作后接着检查结果，沿用已确认的选择与授权。
 
@@ -49,20 +39,7 @@ Agent 负责检查、选版本、安装、配置和验证。玩家只在需要�
 
 按实际任务使用已有可靠替代方案。进入自动场景验证前接通状态读取；最小 Mod 已加载与调试工具已就绪分别记录。
 
-需要 Python 配套工具时，使用确认的解释器建立项目环境。以下变量由 Agent 按实际路径填写：
-
-Windows PowerShell：
-
-    & $pythonExe -m venv (Join-Path $projectDir '.venv')
-    $projectPython = Join-Path $projectDir '.venv\Scripts\python.exe'
-    & $projectPython (Join-Path $skillDir 'scripts\moddev.py') init --project $projectDir
-
-macOS/Linux 的 shell：
-
-    "$pythonExe" -m venv "$projectDir/.venv"
-    "$projectDir/.venv/bin/python" "$skillDir/scripts/moddev.py" init --project "$projectDir"
-
-Python 命令可能为 python 或 python3，使用已发现的解释器绝对路径。虚拟环境不跨系统复制，换系统后重新建立；项目相对路径推荐使用 /，本机工具绝对路径重新配置。Godot 命令方式参考 [官方命令行说明](https://docs.godotengine.org/en/stable/tutorials/editor/command_line_tutorial.html)，虚拟环境布局参考 [Python venv](https://docs.python.org/3/library/venv.html)。
+需要 Python 配套工具时，由 Agent 按实际环境选择解释器、建立项目环境并配置路径。
 
 已有项目配置直接复用。init 只生成通用需求、配置和进度；内容模板按 [角色流程](character-mod.md) 添加。填入实际路径后运行 doctor，配置和命令细节见 [工具接口](tools.md)。
 

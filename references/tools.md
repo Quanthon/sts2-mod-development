@@ -18,7 +18,7 @@ languages 指定同步语言；pools 对应遗物池类型；keyword_ids 对应�
 
 init 创建通用配置、需求文档和进度，已有目标文件保持不变并报冲突。通常在最小 Mod 加载成功、Python 准备好后使用。
 required_checks 指定当前任务必需项，默认 python、game、dotnet、godot；Python 用于后段配套工具，IDE 不在检查范围。其他可选项为 openpyxl、Pillow、tutorials、official_reference、sts2_agent、mcp_server、project、ritsulib。旧配置未设置该字段时检查全部。
-doctor 区分 missing 和 optional_missing。doctor 返回系统和架构。Godot 探测支持 Windows .exe、Linux/macOS 原生可执行文件和 macOS .app 应用包，核对执行权限及 Mono 版本标记；识别失败时保留原始输出，按 [环境准备](environment.md) 核对实际能力再适配检测，版本兼容与导出仍需工程验证。
+doctor 返回系统、架构、missing 和 optional_missing，并探测配置的 Godot 程序；识别失败时保留原始输出，按 [环境准备](environment.md) 核对实际能力再适配检测，版本兼容与导出仍需工程验证。
 
 ## 内容模板
 

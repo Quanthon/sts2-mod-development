@@ -34,7 +34,7 @@
 | --- | --- | --- |
 | [Godot .NET 版](https://godotengine.org/download/) | 编辑场景和资源、导出 PCK；使用支持 C# 的版本及所需导出组件 | 默认首批准备 |
 | [.NET SDK](https://dotnet.microsoft.com/download) | 编译 C# Mod；仅安装 Runtime 不够 | 默认首批准备 |
-| 系统终端 | Windows 使用 PowerShell，macOS/Linux 使用现有 shell，检查路径并运行构建命令 | 使用系统已有能力 |
+| 系统终端 | 检查路径并运行构建命令，由 Agent 按当前环境选择操作方式 | 使用系统已有能力 |
 
 代码和配置由 Agent 编辑，不要求玩家安装 Rider、VS Code 或其他 IDE。使用本技能还需要支持技能、文件操作和终端执行的 Agent，以及本机已安装的《杀戮尖塔 2》。
 
@@ -61,7 +61,7 @@
 
 ## 操作系统
 
-先识别系统、架构及游戏运行方式，再根据首选教程配置环境。Godot 检查支持 Windows 可执行文件、macOS 应用包和 Linux 原生程序；依赖安装、Steam 路径及虚拟环境命令见 [环境准备](references/environment.md)。无需为使用 Skill 专门切换到 Windows。
+Skill 不预设操作系统。Agent 先识别实际环境，再根据首选教程和当前项目决定具体操作方式；工作流见 [环境准备](references/environment.md)。
 
 已完成 Windows 工具测试和其他系统分支的模拟测试；macOS/Linux 的原生执行仍需在对应系统验证。随包提供 [三系统 CI 配置](tests/platform-ci.yml)，放入 .github/workflows/tests.yml 后可启用 GitHub Actions（上传该文件需要 workflow 权限）。
 工具测试不证明游戏、第三方 Mod 或调试服务在每个平台上都可用；它们按实际版本另行验证，游戏端经验目前主要来自 Windows。
