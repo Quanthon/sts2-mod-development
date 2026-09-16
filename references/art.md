@@ -6,7 +6,7 @@
 
 preferences.missing_art = ask / placeholder / defer。
 仅在用户选择 placeholder 或明确请求时运行 placeholder；选择 defer 时不运行生成器，按当版框架查明允许缺图的方式。
-临时图是带类型和文字的程序绘制占位图，不是 AI 创作图片。正式素材由使用者提供，其他生成请求另按对应工具处理。
+临时图是带类型和文字的程序绘制占位图，不是 AI 创作图片。生成器按系统查找字体；需要指定中文字体时用 --font <字体文件>，无需更改系统字体设置。正式素材由使用者提供，其他生成请求另按对应工具处理。
 
     python <工具> placeholder --config moddev.json --key SparkStrike --name 火花打击 --type 攻击
 

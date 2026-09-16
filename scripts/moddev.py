@@ -29,6 +29,7 @@ def parser():
             q.add_argument("--name", default="")
             q.add_argument("--type", default="技能")
             q.add_argument("--refresh", action="store_true")
+            q.add_argument("--font", help="Font file for placeholder labels; relative to project or absolute")
         if name == "sync-art":
             q.add_argument("--kind", choices=["cards", "powers", "relics"])
             q.add_argument("--apply", action="store_true")
@@ -65,7 +66,7 @@ def main(argv=None):
             result = accept(project, args.kind, args.key)
         elif args.command == "placeholder":
             from art import placeholder
-            result = placeholder(project, args.key, args.name, args.type, args.refresh)
+            result = placeholder(project, args.key, args.name, args.type, args.refresh, args.font)
         elif args.command == "sync-art":
             from art import sync
             result = sync(project, args.apply, args.kind)

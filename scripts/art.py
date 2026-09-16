@@ -2,6 +2,7 @@
 from __future__ import annotations
 import io
 import os
+import platform
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 from common import encode, file_hash, inside, read_json, stamp, transaction
@@ -39,8 +40,9 @@ def source_for(project, kind, key, row):
         for path in matches:
             source = inside(root, path)
             png_bytes(source)
-            relative = str(source.relative_to(project.root))
-            if registry.get(relative) == file_hash(source):
+            relative = source.relative_to(project.root).as_posix()
+            registered_hash = registry.get(relative, registry.get(relative.replace("/", "\\")))
+            if registered_hash == file_hash(source):
                 placeholders.append(source)
             else:
                 regular.append(source)
@@ -124,33 +126,54 @@ def sync(project, apply=False, kind=None):
     return {"entries": report, "needs_export": bool(changes), "applied": apply,
             "issues": [r for r in report if r["status"] == "issue"]}
 
+def font_candidates():
+    system = platform.system()
+    if system == "Windows":
+        root = Path(os.environ.get("WINDIR", "C:/Windows")) / "Fonts"
+        return [root / "msyh.ttc", root / "arial.ttf"]
+    if system == "Darwin":
+        return [Path("/System/Library/Fonts/PingFang.ttc"),
+                Path("/System/Library/Fonts/STHeiti Light.ttc"),
+                Path("/System/Library/Fonts/Supplemental/Songti.ttc")]
+    return [Path("/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"),
+            Path("/usr/share/fonts/truetype/noto/NotoSansSC-Regular.ttf"),
+            Path.home() / ".local/share/fonts/NotoSansCJK-Regular.ttc"]
+
 def font(size, explicit=None):
-    candidates = [explicit] if explicit else []
-    candidates += [str(Path(os.environ.get("WINDIR", "C:/Windows")) / "Fonts/msyh.ttc"),
-                   str(Path(os.environ.get("WINDIR", "C:/Windows")) / "Fonts/arial.ttf")]
-    for path in candidates:
-        if path and Path(path).is_file():
-            return ImageFont.truetype(path, size)
+    if explicit:
+        return ImageFont.truetype(str(Path(explicit).expanduser()), size)
+    for path in font_candidates():
+        if path.is_file():
+            try:
+                return ImageFont.truetype(str(path), size)
+            except OSError:
+                continue
     return ImageFont.load_default()
 
-def placeholder(project, key, name="", card_type="技能", refresh=False):
+
+def placeholder(project, key, name="", card_type="技能", refresh=False, font_path=None):
     if not KEY.fullmatch(key):
         raise ValueError("Expected PascalCase key")
     root = project.path(project.data["asset_roots"]["cards"])
     target = inside(root, key + ".png")
     registry_path = project.state / "placeholders.json"
     registry = read_json(registry_path, {})
-    relative = str(target.relative_to(project.root))
-    if target.exists() and (not refresh or registry.get(relative) != file_hash(target)):
+    relative = target.relative_to(project.root).as_posix()
+    legacy_relative = relative.replace("/", "\\")
+    registered_hash = registry.get(relative, registry.get(legacy_relative))
+    if target.exists() and (not refresh or registered_hash != file_hash(target)):
         raise ValueError("Existing artwork preserved; refresh only an unchanged generated placeholder")
+    if font_path:
+        requested_font = Path(font_path).expanduser()
+        font_path = requested_font if requested_font.is_absolute() else project.root / requested_font
     colors = {"攻击": "#ECC7C7", "技能": "#D7E7D0", "能力": "#CCD8F1", "状态": "#D5D5D5", "诅咒": "#CDC3DB"}
     image = Image.new("RGB", (250, 190), colors.get(card_type, "#D5D5D5"))
     draw = ImageDraw.Draw(image)
     draw.rectangle((8, 8, 241, 181), outline="#475569", width=2)
-    draw.text((18, 18), "TEMP / " + card_type, fill="#334155", font=font(16))
+    draw.text((18, 18), "TEMP / " + card_type, fill="#334155", font=font(16, font_path))
     label = name or key
     # Fit long labels without altering the identity shown on a second line.
-    label_font = font(21)
+    label_font = font(21, font_path)
     lines, line = [], ""
     for char in label:
         if draw.textlength(line + char, font=label_font) > 210 and line:
@@ -160,12 +183,13 @@ def placeholder(project, key, name="", card_type="技能", refresh=False):
     lines.append(line)
     for i, value in enumerate(lines[:3]):
         draw.text((18, 55 + i * 26), value, fill="#1F2937", font=label_font)
-    key_font = font(12)
+    key_font = font(12, font_path)
     if draw.textlength(key, font=key_font) <= 214:
         draw.text((18, 154), key, fill="#334155", font=key_font)
     out = io.BytesIO()
     image.save(out, format="PNG")
     import hashlib
+    registry.pop(legacy_relative, None)
     registry[relative] = hashlib.sha256(out.getvalue()).hexdigest()
     transaction({target: out.getvalue(), registry_path: encode(registry)},
                 project.state / "backups" / ("placeholder-" + stamp()) if target.exists() else None)

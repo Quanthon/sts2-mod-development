@@ -63,7 +63,7 @@ def init_project(root, profile="common"):
         files.update(content_files(root, root / config["workbook"]))
         files[root / config["asset_manifest"]] = encode({"schema_version": 1, "entries": []})
     transaction(files, create_only=True)
-    return {"profile": profile, "created": [str(p.relative_to(root)) for p in files]}
+    return {"profile": profile, "created": [p.relative_to(root).as_posix() for p in files]}
 
 def add_content(project):
     """Fill missing content inputs while preserving existing user-authored files."""
@@ -82,9 +82,9 @@ def add_content(project):
         if path.exists():
             if not path.is_file():
                 raise ValueError(f"Expected a file destination, found directory: {path}")
-            preserved.append(str(path.relative_to(project.root)))
+            preserved.append(path.relative_to(project.root).as_posix())
         else:
             files[path] = generate()
     transaction(files, create_only=True)
-    return {"created": [str(p.relative_to(project.root)) for p in files],
+    return {"created": [p.relative_to(project.root).as_posix() for p in files],
             "preserved": preserved}

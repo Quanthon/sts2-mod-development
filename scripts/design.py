@@ -136,7 +136,7 @@ def hash_paths(project, paths):
         path = project.path(value)
         if not path.is_file() or path.stat().st_size == 0:
             raise ValueError(f"Missing or empty evidence file: {path}")
-        result[str(path.relative_to(project.root))] = file_hash(path)
+        result[path.relative_to(project.root).as_posix()] = file_hash(path)
     return result
 
 def record(project, kind, key, artifacts, checks, behavior, reason, implementation_id=None):

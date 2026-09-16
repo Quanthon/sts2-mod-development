@@ -1,6 +1,9 @@
 """Read-only dependency inspection; never launches the game or installs software."""
 from __future__ import annotations
 import importlib.metadata
+import os
+import platform
+import plistlib
 import re
 import shutil
 import subprocess
@@ -16,11 +19,35 @@ def probe(command):
         return {"error": str(error)}
 
 def check_godot(path):
-    """Require a runnable Windows Godot .NET build, not merely an existing path."""
+    """Check a native executable or macOS application bundle for Godot .NET."""
+    if path is not None:
+        path = Path(path).expanduser()
+    if path and path.is_dir() and path.suffix.lower() == ".app":
+        bundle = path
+        info = bundle / "Contents/Info.plist"
+        executable = "Godot"
+        if info.is_file():
+            try:
+                with info.open("rb") as stream:
+                    executable = plistlib.load(stream).get("CFBundleExecutable", executable)
+            except (OSError, ValueError, plistlib.InvalidFileException) as error:
+                return {"name": "godot", "path": str(bundle), "available": False,
+                        "dotnet_supported": False, "error": f"Cannot read application bundle: {error}"}
+        if not isinstance(executable, str) or "/" in executable or "\\" in executable or executable in ("", ".", ".."):
+            return {"name": "godot", "path": str(bundle), "available": False,
+                    "dotnet_supported": False, "error": "Invalid application executable name"}
+        path = bundle / "Contents/MacOS" / executable
     detail = {"name": "godot", "path": str(path) if path else None,
               "available": False, "dotnet_supported": False}
-    if path is None or not path.is_file() or path.suffix.lower() != ".exe":
-        detail["error"] = "Configure the Godot .NET executable (.exe), not its directory"
+    if path is None or not path.is_file():
+        detail["error"] = "Configure a Godot executable or macOS .app bundle"
+        return detail
+    if platform.system() == "Windows":
+        executable = path.suffix.lower() == ".exe"
+    else:
+        executable = os.access(path, os.X_OK)
+    if not executable:
+        detail["error"] = "Configured Godot file is not executable on this system"
         return detail
     result = probe([str(path), "--version"])
     detail["probe"] = result
@@ -45,9 +72,14 @@ def doctor(project):
             findings.append({"name": name, "version": version, "available": True})
         except importlib.metadata.PackageNotFoundError:
             findings.append({"name": name, "available": False})
-    dotnet = shutil.which("dotnet")
-    findings.append({"name": "dotnet", "path": dotnet, "available": bool(dotnet), "probe": probe([dotnet, "--version"]) if dotnet else None})
     paths = project.data.get("environment", {})
+    configured_dotnet = paths.get("dotnet")
+    if configured_dotnet:
+        dotnet_path = Path(configured_dotnet).expanduser()
+        dotnet = str(dotnet_path if dotnet_path.is_absolute() else project.root / dotnet_path)
+    else:
+        dotnet = shutil.which("dotnet")
+    findings.append({"name": "dotnet", "path": dotnet, "available": bool(dotnet), "probe": probe([dotnet, "--version"]) if dotnet else None})
     for name in ("game", "godot", "tutorials", "official_reference", "sts2_agent", "mcp_server"):
         configured = paths.get(name)
         path = Path(configured).expanduser() if configured else None
@@ -83,7 +115,7 @@ def doctor(project):
         result = finding.get("probe")
         if result and (result.get("error") or result.get("exit_code", 0) != 0):
             finding["available"] = False
-    return {"findings": findings, "declared_versions": project.data.get("versions", {}),
+    return {"platform": {"system": platform.system(), "architecture": platform.machine()}, "findings": findings, "declared_versions": project.data.get("versions", {}),
             "missing": [f["name"] for f in findings if f["required"] and not f.get("available")],
             "optional_missing": [f["name"] for f in findings if not f["required"] and not f.get("available")],
             "note": "Checks follow required_checks; optional missing tools do not block this workflow. Path checks do not prove game loading or MCP health."}

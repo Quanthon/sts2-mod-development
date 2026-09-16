@@ -31,7 +31,7 @@ def read_json(path, default=None):
 
 def inside(root, value):
     root = Path(root).resolve()
-    path = (root / value).resolve()
+    path = (root / Path(os.fspath(value).replace("\\", "/")).expanduser()).resolve()
     if not path.is_relative_to(root):
         raise ValueError(f"Path is outside project: {path}")
     return path
@@ -91,7 +91,7 @@ class Project:
         self.data = read_json(self.config_path)
         if not isinstance(self.data, dict) or self.data.get("schema_version") != 1:
             raise ValueError("Expected schema_version=1 project config")
-        self.root = (self.config_path.parent / self.data.get("project_root", ".")).resolve()
+        self.root = (self.config_path.parent / Path(self.data.get("project_root", ".").replace("\\", "/")).expanduser()).resolve()
         self.workbook = self.path(self.data["workbook"])
         self.state = self.path(self.data.get("state_dir", ".moddev"))
         self.manifest = self.path(self.data.get("asset_manifest", ".moddev/assets.json"))

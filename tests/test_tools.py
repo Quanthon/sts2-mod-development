@@ -599,6 +599,7 @@ class CommonFlowTests(unittest.TestCase):
         from doctor import check_godot
         candidate = self.root / "godot.exe"
         candidate.write_bytes(b"test fixture; execution mocked")
+        candidate.chmod(0o755)
         cases = [
             ({"exit_code": 0, "output": "4.5.1.stable.mono.official.f62fdbde1"}, True),
             ({"exit_code": 0, "output": "4.5.1.stable.official.f62fdbde1"}, False),
@@ -632,6 +633,109 @@ class CommonFlowTests(unittest.TestCase):
         with patch("doctor.probe", return_value={"exit_code": 0, "output": "test"}):
             with self.assertRaises(ValueError):
                 doctor(Project(config_path))
+
+
+class PlatformTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory(prefix="sts2-platform-test-")
+        self.root = Path(self.tmp.name)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_posix_extensionless_godot(self):
+        from doctor import check_godot
+        candidate = self.root / "godot"
+        candidate.write_text("fixture", encoding="utf-8")
+        candidate.chmod(0o755)
+        with patch("doctor.platform.system", return_value="Linux"), patch("doctor.os.access", return_value=True), patch("doctor.probe", return_value={"exit_code": 0, "output": "4.5.1.stable.mono.official.hash"}) as probe:
+            self.assertTrue(check_godot(candidate)["available"])
+            probe.assert_called_once_with([str(candidate), "--version"])
+
+    def test_posix_file_requires_execute_permission(self):
+        from doctor import check_godot
+        candidate = self.root / "godot"
+        candidate.write_text("fixture", encoding="utf-8")
+        with patch("doctor.platform.system", return_value="Linux"), patch("doctor.os.access", return_value=False), patch("doctor.probe") as probe:
+            self.assertFalse(check_godot(candidate)["available"])
+            probe.assert_not_called()
+
+    def test_macos_app_resolves_bundle_executable(self):
+        import plistlib
+        from doctor import check_godot
+        bundle = self.root / "Godot Mono.app"
+        binary = bundle / "Contents/MacOS/CustomGodot"
+        binary.parent.mkdir(parents=True)
+        binary.write_text("fixture", encoding="utf-8")
+        with (bundle / "Contents/Info.plist").open("wb") as stream:
+            plistlib.dump({"CFBundleExecutable": "CustomGodot"}, stream)
+        with patch("doctor.platform.system", return_value="Darwin"), patch("doctor.os.access", return_value=True), patch("doctor.probe", return_value={"exit_code": 0, "output": "4.5.1.stable.mono.official.hash"}) as probe:
+            result = check_godot(bundle)
+            self.assertTrue(result["available"])
+            self.assertEqual(result["path"], str(binary))
+            probe.assert_called_once_with([str(binary), "--version"])
+
+    def test_macos_missing_bundle_binary_is_not_a_valid_directory(self):
+        from doctor import check_godot
+        bundle = self.root / "Godot.app"
+        bundle.mkdir()
+        with patch("doctor.platform.system", return_value="Darwin"), patch("doctor.probe") as probe:
+            self.assertFalse(check_godot(bundle)["available"])
+            probe.assert_not_called()
+
+    def test_configured_dotnet_works_without_path_discovery(self):
+        init_project(self.root)
+        config_path = self.root / "moddev.json"
+        config = read_json(config_path)
+        config["environment"]["dotnet"] = "tools/dotnet"
+        config["required_checks"] = ["dotnet"]
+        config_path.write_bytes(encode(config))
+        with patch("doctor.shutil.which", return_value=None), patch("doctor.probe", return_value={"exit_code": 0, "output": "9.0.100"}) as probe:
+            result = doctor(Project(config_path))
+        self.assertEqual(result["missing"], [])
+        self.assertEqual(probe.call_args.args[0], [str(self.root / "tools/dotnet"), "--version"])
+        self.assertIn("system", result["platform"])
+        self.assertIn("architecture", result["platform"])
+
+    def test_backslash_paths_are_read_and_traversal_is_still_blocked(self):
+        init_project(self.root)
+        project = Project(self.root / "moddev.json")
+        self.assertEqual(project.path(r"art\cards\Spark.png"), self.root / "art/cards/Spark.png")
+        with self.assertRaises(ValueError):
+            project.path(r"..\outside.png")
+
+    def test_legacy_placeholder_registry_can_be_refreshed_portably(self):
+        init_project(self.root)
+        project = Project(self.root / "moddev.json")
+        placeholder(project, "Spark")
+        registry_path = project.state / "placeholders.json"
+        registry = read_json(registry_path)
+        self.assertIn("art/cards/Spark.png", registry)
+        registry_path.write_bytes(encode({r"art\cards\Spark.png": registry["art/cards/Spark.png"]}))
+        placeholder(project, "Spark", refresh=True)
+        registry = read_json(registry_path)
+        self.assertEqual(set(registry), {"art/cards/Spark.png"})
+
+    def test_explicit_font_and_platform_font_fallback(self):
+        from art import font, font_candidates
+        for system in ("Windows", "Darwin", "Linux"):
+            with self.subTest(system=system), patch("art.platform.system", return_value=system):
+                self.assertTrue(font_candidates())
+                with patch.object(Path, "is_file", return_value=False), patch("art.ImageFont.load_default", return_value="fallback"):
+                    self.assertEqual(font(12), "fallback")
+        with patch("art.ImageFont.truetype", return_value="selected") as selected:
+            self.assertEqual(font(20, str(self.root / "custom.ttf")), "selected")
+            selected.assert_called_once_with(str(self.root / "custom.ttf"), 20)
+
+    @unittest.skipIf(sys.platform == "win32", "requires native POSIX process execution")
+    def test_native_posix_executable_probe(self):
+        from doctor import check_godot
+        candidate = self.root / "godot-fixture"
+        candidate.write_text("#!/bin/sh\nprintf '4.5.1.stable.mono.official.fixture\\n'\n", encoding="utf-8")
+        candidate.chmod(0o755)
+        self.assertTrue(check_godot(candidate)["available"])
+        candidate.chmod(0o644)
+        self.assertFalse(check_godot(candidate)["available"])
 
 if __name__ == "__main__":
     unittest.main()

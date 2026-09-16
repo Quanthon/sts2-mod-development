@@ -5,9 +5,10 @@ CLI 输出 JSON：0 表示本次操作成功，2 表示检查发现待处理项�
 
 ## 配置
 
-moddev.json 使用 schema_version=1，project_root 相对配置文件目录。workbook、state_dir、asset_manifest、csproj、asset_roots 是项目内路径；environment 可指向外部工具。
+moddev.json 使用 schema_version=1，project_root 相对配置文件目录。workbook、state_dir、asset_manifest、csproj、asset_roots 是项目内路径；environment 可指向外部工具；environment.dotnet 可指定 SDK 启动程序，未设置时从 PATH 查找。
 languages 指定同步语言；pools 对应遗物池类型；keyword_ids 对应关键词稳定实现 ID；preferences 保存素材选择和测试范围，versions 记录核对过的版本。
 
+项目相对路径使用 /；读取时兼容既有反斜杠路径，验证和占位图记录的新路径统一为 /。更换系统时重新配置机器相关绝对路径和虚拟环境。
 这些字段和下面的表格/PNG 要求属于当前脚本接口。已有项目的其他格式可通过适配接入，无需为了使用工具改变设计。
 
 ## 初始化与检查
@@ -17,7 +18,7 @@ languages 指定同步语言；pools 对应遗物池类型；keyword_ids 对应�
 
 init 创建通用配置、需求文档和进度，已有目标文件保持不变并报冲突。通常在最小 Mod 加载成功、Python 准备好后使用。
 required_checks 指定当前任务必需项，默认 python、game、dotnet、godot；Python 用于后段配套工具，IDE 不在检查范围。其他可选项为 openpyxl、Pillow、tutorials、official_reference、sts2_agent、mcp_server、project、ritsulib。旧配置未设置该字段时检查全部。
-doctor 区分 missing 和 optional_missing。当前 Godot 探测识别 .exe 与 Mono 版本标记；识别失败时保留原始输出，按 [环境准备](environment.md) 核对实际能力再适配检测，版本兼容与导出仍需工程验证。
+doctor 区分 missing 和 optional_missing。doctor 返回系统和架构。Godot 探测支持 Windows .exe、Linux/macOS 原生可执行文件和 macOS .app 应用包，核对执行权限及 Mono 版本标记；识别失败时保留原始输出，按 [环境准备](environment.md) 核对实际能力再适配检测，版本兼容与导出仍需工程验证。
 
 ## 内容模板
 
@@ -51,4 +52,5 @@ record 不执行测试，accept 核对设计、配置和文件哈希，只接受
     python <工具> sync-art --config moddev.json --apply
     python <工具> icons --config moddev.json --key Momentum --apply
 
+placeholder 自动尝试本机系统字体；中文缺字或需指定字体时使用 --font <字体文件>，相对路径按项目根目录解析，也支持绝对路径。
 适用于显式清单中的 PNG。匹配、占位图保护、备份与生成规则见 [素材处理](art.md)。这些命令处理资源文件，导出 PCK 和游戏加载由项目流程完成。

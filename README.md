@@ -2,7 +2,7 @@
 
 面向 Agent 的《杀戮尖塔 2》Mod 开发技能。使用者负责设计，Agent 按项目实际情况实现、验证并维护工作流。
 
-支持角色与卡牌内容、皮肤、特效和其他玩法改动。当前工具面向 Windows；文档中的工具与实现方式是默认建议，按实际游戏版本和工程适配。
+支持角色与卡牌内容、皮肤、特效和其他玩法改动。流程按 Windows、macOS 或 Linux 的实际环境适配；文档中的工具与实现方式是默认建议，按实际游戏版本和工程适配。
 
 ## 使用
 
@@ -32,9 +32,9 @@
 
 | 工具 | 用途 | 何时需要 |
 | --- | --- | --- |
-| [Godot .NET 版](https://godotengine.org/download/windows/) | 编辑场景和资源、导出 PCK；使用支持 C# 的版本及所需导出组件 | 默认首批准备 |
+| [Godot .NET 版](https://godotengine.org/download/) | 编辑场景和资源、导出 PCK；使用支持 C# 的版本及所需导出组件 | 默认首批准备 |
 | [.NET SDK](https://dotnet.microsoft.com/download) | 编译 C# Mod；仅安装 Runtime 不够 | 默认首批准备 |
-| Windows PowerShell | 检查游戏和工具路径、创建文件、调用构建与启动命令 | 使用系统已有能力 |
+| 系统终端 | Windows 使用 PowerShell，macOS/Linux 使用现有 shell，检查路径并运行构建命令 | 使用系统已有能力 |
 
 代码和配置由 Agent 编辑，不要求玩家安装 Rider、VS Code 或其他 IDE。使用本技能还需要支持技能、文件操作和终端执行的 Agent，以及本机已安装的《杀戮尖塔 2》。
 
@@ -58,6 +58,13 @@
 - 完整准备流程见 [环境准备](references/environment.md)，发布与采集见 [发布与扩展](references/extensions.md)。
 
 上述工具是当前默认选择，可依据项目和游戏版本使用经过核实的替代方案。第三方工具不随本仓库打包。
+
+## 操作系统
+
+先识别系统、架构及游戏运行方式，再根据首选教程配置环境。Godot 检查支持 Windows 可执行文件、macOS 应用包和 Linux 原生程序；依赖安装、Steam 路径及虚拟环境命令见 [环境准备](references/environment.md)。无需为使用 Skill 专门切换到 Windows。
+
+已完成 Windows 工具测试和其他系统分支的模拟测试；macOS/Linux 的原生执行仍需在对应系统验证。随包提供 [三系统 CI 配置](tests/platform-ci.yml)，放入 .github/workflows/tests.yml 后可启用 GitHub Actions（上传该文件需要 workflow 权限）。
+工具测试不证明游戏、第三方 Mod 或调试服务在每个平台上都可用；它们按实际版本另行验证，游戏端经验目前主要来自 Windows。
 
 ## 验证
 
