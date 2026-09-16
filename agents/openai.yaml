@@ -1,0 +1,4 @@
+interface:
+  display_name: "STS2 Mod 程序实现"
+  short_description: "按需求选择角色、皮肤、特效等开发流程，共用环境准备、实现验证与发布工具"
+  default_prompt: "使用 $sts2-mod-development，根据我的需求选择合适流程来实现或更新 STS2 Mod。"

@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "project_root": ".",
+  "mod_id": "",
+  "namespace": "",
+  "csproj": "",
+  "workbook": "design/mod-design.xlsx",
+  "state_dir": ".moddev",
+  "asset_manifest": ".moddev/assets.json",
+  "languages": [
+    "zhs",
+    "eng"
+  ],
+  "pools": {
+    "通用": "SharedRelicPool"
+  },
+  "asset_roots": {
+    "cards": "art/cards",
+    "powers": "art/powers",
+    "relics": "art/relics"
+  },
+  "environment": {
+    "game": "",
+    "godot": "",
+    "tutorials": "references/tutorials",
+    "official_reference": "references/official",
+    "sts2_agent": "",
+    "mcp_server": ""
+  },
+  "versions": {
+    "game": "",
+    "ritsulib": "",
+    "godot": "",
+    "sts2_agent": ""
+  },
+  "preferences": {
+    "missing_art": "ask",
+    "test_save_authorization": ""
+  },
+  "keyword_ids": {},
+  "required_checks": [
+    "python",
+    "game",
+    "dotnet",
+    "godot"
+  ]
+}
